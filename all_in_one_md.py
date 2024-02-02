@@ -1,76 +1,39 @@
-import codecs
-import warnings
-from pathlib import Path
+import markdown
 
-import pdfkit
-from markdown import markdown
+file_path = "C:\\Users\\114514\\Desktop\\print\\yourgitbook"
+# your gitbook local address
+# you may put this document under the file_path
 
+all_path = []
 
-class GitBook:
-    __slots__ = (
-        "working_directory",
-        "output_filepath",
-        "tmp_md_filepath",
-        "encoding",
-        "recursive",
-    )
+all_path.append(file_path + "\\summary.md")
 
-    def __init__(
-        self,
-        working_directory: str,
-        output_filepath: str,
-        encoding: str,
-        recursive: bool,
-    ):
-        """见main.py中的argparse部分。"""
-        self.working_directory = Path(working_directory)
-        if not self.working_directory.is_dir():
-            raise ValueError(f"{self.working_directory} is not a directory.")
-        self.output_filepath = Path(output_filepath)
-        if self.output_filepath.exists():
-            warnings.warn("The output file already exists and will be overwritten.")
-        self.tmp_md_filepath = self.output_filepath.with_suffix(".md").absolute()
-        if self.tmp_md_filepath.exists():
-            warnings.warn(
-                "The temporary markdown file already exists and will be overwritten."
-            )
-        self.encoding = codecs.lookup(encoding).name
-        self.recursive = recursive
+with open(file_path + "\\summary.md", 'r', encoding='utf-8') as file:
+    content = file.read()
+    for line in content.split('\n'):
+        if "(" in line and ")" in line:
 
-    def _find_markdowns(self):
-        pattern = "**/*.md" if self.recursive else "*.md"
+            start = line.index("(") + 1
+            end = line.index(")")
+            content = line[start:end]
+            if content.endswith(".md"):
+                all_path.append(file_path + "\\" + content)
 
-        def not_opt(fp: Path):
-            return fp.absolute() != self.tmp_md_filepath  # tmp_md_filepath已保证为绝对路径
+all_in_one = ""
 
-        for f in filter(not_opt, self.working_directory.glob(pattern)):
-            yield (
-                f.read_text(encoding=self.encoding)
-                .replace("# ", "## ")
-                .replace("## 第", "# 第")
-            )
+for i in all_path:
+    with open(i, 'r', encoding='utf-8') as file:
+        all_in_one += file.read()
+        all_in_one += '\n\n\n'
 
-    def _convert(self, html: str):
-        pdfkit.from_string(
-            markdown(html, extensions=["extra", "codehilite"], output_format="html"),
-            self.output_filepath,
-            configuration=pdfkit.configuration(
-                wkhtmltopdf="wkhtmltopdf/wkhtmltopdf.exe"
-            ),
-            options={"encoding": self.encoding},
-        )
+with open(file_path + '\\.gitbook\\all_in_one.md', 'w', encoding='utf-8') as file:
+    file.write(all_in_one)
 
-    def merge(self):
-        """将指定工作路径下的md文件合并成一个md文件并写入到指定的输出文件中。"""
-        with open(self.tmp_md_filepath, "w", encoding=self.encoding) as f:
-            f.writelines(self._find_markdowns())
+with open(file_path + '\\.gitbook\\all_in_one.md', 'r', encoding='utf-8') as markdown_file:
+    markdown_content = markdown_file.read()
 
-    def convert(self):
-        """将指定的md文件转换成pdf文件。"""
-        with open(self.tmp_md_filepath, encoding=self.encoding) as f:
-            html = f.read()
-        self._convert(html)
+    html_content = markdown.markdown(markdown_content)
 
-    def merge_and_convert(self):
-        """将指定工作路径下的md文件合并成一个md文件并转换成pdf文件。"""
-        self._convert("\n".join(self._find_markdowns()))
+    with open(file_path + '\\.gitbook\\all_in_one.html', 'w', encoding='utf-8') as html_file:
+        html_file.write(html_content)
+
