@@ -1,6 +1,6 @@
 import markdown
 
-file_path = "C:\\Users\\114514\\Desktop\\yourgitbook"
+file_path = "C:\\Users\\114514\\Documents\\GitHub"
 # your gitbook local address
 
 all_path = []
@@ -24,7 +24,7 @@ for i in all_path:
         all_in_one += file.read()
         all_in_one += '\n\n\n'
 
-with open(file_path + '\\.gitbook\\all_in_one.md', 'w', encoding='utf-8') as file:
+with open(file_path + '\\all_in_one.md', 'w', encoding='utf-8') as file:
     file.write(all_in_one)
 
 css_style = """
@@ -70,11 +70,11 @@ blockquote {
 </style>
 """
 
-with open(file_path + '\\.gitbook\\all_in_one.md', 'r', encoding='utf-8') as markdown_file:
+with open(file_path + '\\all_in_one.md', 'r', encoding='utf-8') as markdown_file:
     markdown_content = markdown_file.read()
 
     html_content = markdown.markdown(markdown_content)
     full_html_content = f"<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<title>Document</title>\n{css_style}\n</head>\n<body>\n{html_content}\n</body>\n</html>"
 
-    with open(file_path + '\\.gitbook\\all_in_one.html', 'w', encoding='utf-8') as html_file:
+    with open(file_path + '\\all_in_one.html', 'w', encoding='utf-8') as html_file:
         html_file.write(full_html_content)
